@@ -4,10 +4,10 @@ import requests
 from uuid import uuid4
 import sys
 import json
+from platform import node
 
 google_dns = "8.8.8.8"
 failed_pings = []
-global ping_count
 ping_count = 0
 
 def main():
@@ -16,7 +16,18 @@ def main():
     endpoint = sys.argv[1]
     global gateway
     gateway = sys.argv[2]
-    start_pinging()
+    send_script_break_to_db()
+    while True:
+        global ping_count
+        ping_action()
+        ping_count += 1
+        sleep(10)
+
+def print_test():
+    print('test')
+
+def send_script_break_to_db():
+    send_values(["0", "0"])
 
 def ping(ip):
     ping_success = subprocess.run(["ping", "-c", "1", ip], capture_output=True)
@@ -26,23 +37,15 @@ def ping(ip):
         time_value_index = ping_success_string.index('time') + 5
         latency = ping_success_string[time_value_index:].split(' ')[0]
 
-        if (ping_count < 150 and ping_count > 15 and ip == google_dns):
-            return "Infinity"
-
         return latency
     else:
         print('failure')
-        return 'Infinity'
+        return "0"
 
-def start_pinging():
-    global ping_count
-    print(f'Ping # {ping_count}')
+def ping_action():
     gateway = ping_gateway()
     google = ping_google_dns()
     send_values([gateway, google])
-    ping_count += 1
-    sleep(10)
-    start_pinging()
 
 def ping_google_dns():
     return ping(google_dns)
@@ -55,6 +58,8 @@ def send_values(values):
     ping_time = round(time() * 1000)
 
     raw = {
+        "pk": node(),
+        "sk":f'{str(ping_time)}',
         "id": str(id),
         "ping_time": str(ping_time),
         "gateway": {
@@ -69,7 +74,7 @@ def send_values(values):
 
     data = json.dumps(raw)
 
-    if (values[1] == "Infinity"):
+    if (values[1] == "-1"):
         print('google ping failed, adding to failed ping')
         failed_pings.append(raw)
     else:
