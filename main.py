@@ -74,7 +74,7 @@ def send_values(values):
 
     data = json.dumps(raw)
 
-    if (values[1] == "-1"):
+    if (values[1] == "0"):
         print('google ping failed, adding to failed ping')
         failed_pings.append(raw)
     else:

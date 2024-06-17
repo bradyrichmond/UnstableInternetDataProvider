@@ -1,0 +1,1 @@
+I recently moved into a new apartment. There is only one internet service povider. I lose connection frequently and for long periods of time. I wanted to track this data to figure out how much time I was losing to internet disruptions. This is the front end of that effort.
